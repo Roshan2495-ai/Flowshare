@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>FlowShare - Clipboard Sync</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        #status {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        #messages {
+            border: 1px solid #ccc;
+            height: 400px;
+            overflow-y: scroll;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .message {
+            padding: 8px;
+            margin: 5px 0;
+            background: #f0f0f0;
+            border-radius: 5px;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>FlowShare - Clipboard Sync</h1>
+    <div id="status">Connecting...</div>
+    <div id="messages"></div>
+
+    <script>
+        const ws = new WebSocket('ws://localhost:3000');
+        const messagesDiv = document.getElementById('messages');
+        const statusDiv = document.getElementById('status');
+
+        const clientId = Math.random().toString(36).substring(7);
+        let lastClipboard = '';
+
+        ws.onopen = () => {
+            console.log('Connected to FlowShare');
+            statusDiv.textContent = '✓ Connected - Monitoring clipboard';
+            startClipboardMonitor();
+        };
+
+        ws.onmessage = async (event) => {
+            const data = JSON.parse(event.data);
+
+            // Show message
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.textContent = data.text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            // Update clipboard only if from another client
+            if (data.clientId !== clientId) {
+                try {
+                    await navigator.clipboard.writeText(data.text);
+                    lastClipboard = data.text;
+                    console.log('Clipboard updated from another client');
+                } catch (err) {
+                    console.error('Failed to write clipboard:', err);
+                }
+            }
+        };
+
+        async function startClipboardMonitor() {
+            setInterval(async () => {
+                try {
+                    const text = await navigator.clipboard.readText();
+
+                    if (text && text !== lastClipboard) {
+                        lastClipboard = text;
+                        const message = JSON.stringify({
+                            clientId: clientId,
+                            text: text
+                        });
+                        ws.send(message);
+                        console.log('Clipboard changed, sent to server');
+                    }
+                } catch (err) {
+                    console.error('Failed to read clipboard:', err);
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>
