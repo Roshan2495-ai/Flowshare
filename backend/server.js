@@ -128,8 +128,9 @@ app.use((err, req, res, next) => {
     });
 });
 
-app.listen(3000, () => {
-    console.log("🔥 FlowShare server running on http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🔥 FlowShare server running on port ${PORT}`);
     // Create uploads dir if it doesn't exist
     if (!fs.existsSync(path.join(process.cwd(), "uploads"))) {
         fs.mkdirSync(path.join(process.cwd(), "uploads"));
