@@ -20,7 +20,7 @@ import { ToastNotification, Toast } from "./components/Toast";
 import { FileCard } from "./components/FileCard";
 
 // --- CONFIG ---
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export default function Home() {
   // --- STATE ---
