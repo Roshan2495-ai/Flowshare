@@ -9,8 +9,8 @@ const app = express();
 
 // Enable CORS for all origins (especially for localhost:3001)
 app.use(cors({
-    origin: process.env.CLIENT_URL || "*",
-    methods: ["GET", "POST"],
+    origin: "*",
+    methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"]
 }));
 app.use(express.json());
