@@ -20,7 +20,7 @@ import { ToastNotification, Toast } from "./components/Toast";
 import { FileCard } from "./components/FileCard";
 
 // --- CONFIG ---
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://flowshare-nkup.onrender.com";
 
 export default function Home() {
   // --- STATE ---
