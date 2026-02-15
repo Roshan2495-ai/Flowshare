@@ -126,7 +126,7 @@ export default function Home() {
   };
 
   // --- UPLOAD LOGIC ---
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (!file || !roomId) {
       showToast("Please select a file", "error");
       return;
@@ -139,47 +139,53 @@ export default function Home() {
     formData.append("roomId", roomId);
     formData.append("file", file);
 
-    try {
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => (prev >= 90 ? 90 : prev + 10));
-      }, 100);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${BACKEND_URL}/upload`);
 
-      const res = await fetch(`${BACKEND_URL}/upload`, {
-        method: "POST",
-        body: formData,
-      });
+    // Track upload progress
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentComplete = (event.loaded / event.total) * 100;
+        setUploadProgress(Math.round(percentComplete));
+      }
+    };
 
-      clearInterval(progressInterval);
-      setUploadProgress(100);
+    // Handle response
+    xhr.onload = async () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        showToast("Uploaded successfully", "success");
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
 
-      const type = res.headers.get("content-type");
-      let data;
+        // Refresh file list
+        try {
+          const listRes = await fetch(`${BACKEND_URL}/files/${roomId}`);
+          const listData = await listRes.json();
+          if (Array.isArray(listData)) setFiles(listData);
+        } catch (err) {
+          console.error("Failed to refresh file list", err);
+        }
 
-      if (type && type.includes("application/json")) {
-        data = await res.json();
+        setTimeout(() => setUploadProgress(0), 1000);
       } else {
-        throw new Error("Server error");
+        let message = "Upload failed";
+        try {
+          const response = JSON.parse(xhr.responseText);
+          message = response.message || message;
+        } catch (e) { }
+        showToast(message, "error");
+        setUploadProgress(0);
       }
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Upload failed");
-      }
-
-      showToast("Uploaded successfully", "success");
-      setFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-
-      const listRes = await fetch(`${BACKEND_URL}/files/${roomId}`);
-      const listData = await listRes.json();
-      if (Array.isArray(listData)) setFiles(listData);
-
-      setTimeout(() => setUploadProgress(0), 1000);
-    } catch (err: any) {
-      showToast(err.message || "Upload failed", "error");
-      setUploadProgress(0);
-    } finally {
       setStatus("IDLE");
-    }
+    };
+
+    xhr.onerror = () => {
+      showToast("Network error during upload", "error");
+      setUploadProgress(0);
+      setStatus("IDLE");
+    };
+
+    xhr.send(formData);
   };
 
   // --- QR SCANNER ---
