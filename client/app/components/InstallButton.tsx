@@ -3,10 +3,16 @@
 import { useEffect, useState } from "react";
 import styles from "./InstallButton.module.css";
 
-// Extend Event to include the PWA install-prompt API
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
+// Extend window type for our global prompt store
+declare global {
+  interface Window {
+    __pwaPrompt: BeforeInstallPromptEvent | null;
+  }
 }
 
 export default function InstallButton() {
@@ -15,36 +21,51 @@ export default function InstallButton() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // If already running as a standalone PWA, skip everything
+    // Already running as standalone PWA?
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as Navigator & { standalone?: boolean }).standalone ===
-      true;
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
 
     if (isStandalone) {
       setIsInstalled(true);
       return;
     }
 
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault(); // prevent the mini-infobar from appearing
+    // ✅ Key fix: read the globally captured prompt
+    // The inline script in layout.tsx stores it before React even mounts,
+    // so we never miss the event even if Chrome fires it very early.
+    if (window.__pwaPrompt) {
+      setDeferredPrompt(window.__pwaPrompt);
+    }
+
+    // Also listen for the custom event fired by the inline script
+    const onPromptReady = () => {
+      if (window.__pwaPrompt) {
+        setDeferredPrompt(window.__pwaPrompt);
+      }
+    };
+
+    // And the standard event (in case it fires after mount)
+    const onBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      window.__pwaPrompt = e as BeforeInstallPromptEvent;
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
 
-    const handleAppInstalled = () => {
+    const onAppInstalled = () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
+      window.__pwaPrompt = null;
     };
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    window.addEventListener("appinstalled", handleAppInstalled);
+    window.addEventListener("pwa-prompt-ready", onPromptReady);
+    window.addEventListener("beforeinstallprompt", onBeforeInstall);
+    window.addEventListener("appinstalled", onAppInstalled);
 
     return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt
-      );
-      window.removeEventListener("appinstalled", handleAppInstalled);
+      window.removeEventListener("pwa-prompt-ready", onPromptReady);
+      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
+      window.removeEventListener("appinstalled", onAppInstalled);
     };
   }, []);
 
@@ -58,11 +79,10 @@ export default function InstallButton() {
       setIsInstalled(true);
     }
 
-    // Always clear the prompt after it has been used
     setDeferredPrompt(null);
+    window.__pwaPrompt = null;
   };
 
-  // Render nothing if no prompt is available or the app is already installed
   if (!deferredPrompt || isInstalled) return null;
 
   return (

@@ -13,7 +13,8 @@ import {
   Check,
   CloudUpload,
   FolderOpen,
-  ArrowRight
+  ArrowRight,
+  Home as HomeIcon
 } from "lucide-react";
 import { Button } from "./components/Button";
 import { ToastNotification, Toast } from "./components/Toast";
@@ -262,73 +263,83 @@ export default function Home() {
 
   // --- RENDER ---
   return (
-    <main className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-x-hidden">
+    <main
+      className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-x-hidden"
+      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 112px)' }}
+    >
       <ToastNotification toasts={toasts} onRemove={removeToast} />
 
-      <div className="relative z-10 w-full max-w-sm md:max-w-xl mx-auto">
+      <div className="relative z-10 w-full max-w-sm md:max-w-md mx-auto">
 
         {/* === HOME PAGE === */}
         {!roomId && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center min-h-[85vh] gap-12 md:gap-16 py-10"
+            className="flex flex-col items-center gap-10 md:gap-12 py-8"
           >
             {/* Header */}
-            <div className="text-center space-y-6">
-              <h1 className="text-6xl md:text-8xl font-black gradient-text tracking-tighter">
+            <div className="text-center space-y-4">
+              <h1 className="text-5xl md:text-7xl font-black gradient-text tracking-tight">
                 FlowShare
               </h1>
-              <p className="text-gray-400 text-lg md:text-xl font-medium max-w-md mx-auto leading-relaxed">
-                Instant file sharing across devices. <br className="hidden md:block" /> No login. No limits. Just QR.
+              <p className="text-gray-400 text-base md:text-lg font-medium max-w-xs mx-auto leading-relaxed">
+                Instant file sharing across devices.<br />No login. No limits. Just QR.
               </p>
             </div>
 
-            {/* Main Card */}
-            <div className="glass-strong rounded-3xl p-8 md:p-10 w-full space-y-8 shadow-2xl shadow-indigo-500/10 border border-white/10">
+            {/* Main Card — matches reference layout */}
+            <div className="glass-strong rounded-2xl p-5 md:p-7 w-full flex flex-col gap-0">
 
+              {/* Create New Room — blue→purple gradient */}
               <Button
                 onClick={createRoom}
-                variant="primary"
                 size="lg"
-                className="w-full text-lg h-14 md:h-16 shadow-indigo-500/20 shadow-xl"
-                icon={<Plus className="w-6 h-6" />}
+                className="w-full h-14 text-base font-semibold rounded-xl btn-lift border-0 text-white"
+                style={{ background: 'linear-gradient(to right, #3b82f6, #7c3aed, #9333ea)' }}
+                icon={<Plus className="w-5 h-5" />}
               >
                 Create New Room
               </Button>
 
-              <div className="relative flex items-center py-4">
-                <div className="flex-grow border-t border-white/10"></div>
-                <span className="flex-shrink-0 mx-6 text-gray-500 text-sm font-semibold tracking-wider uppercase">Or Join Room</span>
-                <div className="flex-grow border-t border-white/10"></div>
+              {/* OR JOIN ROOM Divider */}
+              <div className="relative flex items-center my-4">
+                <div className="flex-grow border-t border-white/[0.08]"></div>
+                <span className="flex-shrink-0 mx-4 text-gray-500 text-[10px] font-bold tracking-[0.15em] uppercase">
+                  Or Join Room
+                </span>
+                <div className="flex-grow border-t border-white/[0.08]"></div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <input
-                    type="text"
-                    placeholder="Enter Room ID"
-                    value={tempRoomId}
-                    onChange={(e) => setTempRoomId(e.target.value.toUpperCase())}
-                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-6 h-14 text-center font-mono text-xl focus:outline-none focus:border-indigo-500 transition-all placeholder:text-gray-600 focus:bg-white/10"
-                    maxLength={10}
-                  />
-                  <Button
-                    onClick={() => joinRoom(tempRoomId)}
-                    className="px-8 h-14 text-lg bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white shadow-lg shadow-fuchsia-500/25 border-0 group"
-                    disabled={!tempRoomId}
-                  >
-                    <span>Join</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </div>
+              {/* Input + Join — side by side matching reference */}
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  placeholder="Enter  Room ID"
+                  value={tempRoomId}
+                  onChange={(e) => setTempRoomId(e.target.value.toUpperCase())}
+                  className="flex-1 min-w-0 bg-white/[0.06] border border-white/10 rounded-xl px-5 h-12 font-mono text-base focus:outline-none focus:border-violet-500/60 transition-all placeholder:text-gray-600 focus:bg-white/[0.09]"
+                  maxLength={10}
+                />
+                <Button
+                  onClick={() => joinRoom(tempRoomId)}
+                  className="shrink-0 px-5 h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white border-0 group btn-lift"
+                  disabled={!tempRoomId}
+                >
+                  <span>Join</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </Button>
               </div>
 
+              {/* Thin separator */}
+              <div className="border-t border-white/[0.05] my-4" />
+
+              {/* Scan QR Code */}
               <Button
                 onClick={() => setStatus("SCANNING")}
                 variant="ghost"
-                className="w-full text-base h-12 hover:bg-white/5 text-gray-400 hover:text-white transition-all"
-                icon={<Camera className="w-5 h-5" />}
+                className="w-full h-11 rounded-xl hover:bg-white/[0.06] text-gray-400 hover:text-gray-200 text-sm transition-all btn-lift"
+                icon={<Camera className="w-4 h-4" />}
               >
                 Scan QR Code
               </Button>
@@ -375,7 +386,7 @@ export default function Home() {
             className="flex flex-col gap-4 pb-8"
           >
             {/* Header / Room ID */}
-            <div className="glass-strong rounded-2xl p-6 relative flex flex-col items-center">
+            <div className="glass-strong rounded-[22px] p-7 relative flex flex-col items-center">
               <button
                 onClick={leaveRoom}
                 className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white"
@@ -404,7 +415,7 @@ export default function Home() {
             </div>
 
             {/* Upload Area */}
-            <div className="glass-strong rounded-2xl p-6">
+            <div className="glass-strong rounded-[22px] p-7">
               <div
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={handleDragOver}
@@ -471,7 +482,7 @@ export default function Home() {
                 onClick={handleUpload}
                 disabled={!file || status === "UPLOADING"}
                 variant="primary"
-                className="w-full mt-4"
+                className="w-full mt-5 rounded-2xl btn-lift"
                 icon={status === "UPLOADING" ? null : <Upload className="w-4 h-4" />}
                 loading={status === "UPLOADING"}
               >
@@ -480,7 +491,7 @@ export default function Home() {
             </div>
 
             {/* File List */}
-            <div className="glass-strong rounded-2xl p-6 min-h-[200px]">
+            <div className="glass-strong rounded-[22px] p-7 min-h-[200px]">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-bold flex items-center gap-2">
                   <FolderOpen className="w-5 h-5 text-indigo-400" />
@@ -513,6 +524,46 @@ export default function Home() {
           </motion.div>
         )}
       </div>
+
+      {/* ===== BOTTOM NAVIGATION BAR ===== */}
+      {/* Uses env(safe-area-inset-bottom) so it floats above system nav on ALL phones */}
+      <div
+        className="fixed left-1/2 -translate-x-1/2 z-50"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}
+      >
+        <div
+          className="flex items-center overflow-hidden rounded-full"
+          style={{
+            background: 'rgba(255, 255, 255, 0.06)',
+            backdropFilter: 'blur(28px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,92,246,0.15), 0 4px 24px rgba(100,30,200,0.3)',
+          }}
+        >
+          {/* Home */}
+          <button
+            onClick={leaveRoom}
+            className="flex items-center justify-center w-16 h-14 text-gray-400 hover:text-white active:text-white transition-colors"
+            aria-label="Home"
+          >
+            <HomeIcon className="w-5 h-5" />
+          </button>
+
+          {/* Divider */}
+          <div className="w-px h-6 bg-white/10 shrink-0" />
+
+          {/* QR Scan */}
+          <button
+            onClick={() => setStatus("SCANNING")}
+            className="flex items-center justify-center w-16 h-14 text-gray-400 hover:text-white active:text-white transition-colors"
+            aria-label="Scan QR Code"
+          >
+            <QrCode className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
     </main>
+
   );
 }
