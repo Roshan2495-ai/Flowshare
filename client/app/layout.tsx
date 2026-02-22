@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import InstallButton from "./components/InstallButton";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,8 +28,11 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#8b5cf6" />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
+        <InstallButton />
         {children}
       </body>
     </html>

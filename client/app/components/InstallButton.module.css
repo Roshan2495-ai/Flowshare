@@ -1,0 +1,68 @@
+.button {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 999;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 18px;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    color: #ffffff;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+
+    box-shadow:
+        0 0 16px rgba(139, 92, 246, 0.55),
+        0 4px 12px rgba(0, 0, 0, 0.35);
+
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+
+    pointer-events: auto;
+}
+
+.button:hover {
+    transform: scale(1.05);
+    box-shadow:
+        0 0 28px rgba(139, 92, 246, 0.75),
+        0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+.button:active {
+    transform: scale(0.98);
+    box-shadow:
+        0 0 12px rgba(139, 92, 246, 0.45),
+        0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.icon {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.label {
+    line-height: 1;
+}
+
+@media (max-width: 640px) {
+    .button {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        gap: 6px;
+    }
+
+    .icon {
+        font-size: 0.85rem;
+    }
+}
